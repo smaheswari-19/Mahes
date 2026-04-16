@@ -1,0 +1,37 @@
+#include <vector>
+#include <string>
+#include <numeric>
+
+using namespace std;
+
+class Solution {
+public:
+    string getPermutation(int n, int k) {
+        vector<int> numbers;
+        vector<int> factorial(n, 1);
+        
+        // 1. Create a list of numbers [1, 2, 3, ..., n]
+        // 2. Precompute factorials for positions
+        for (int i = 1; i < n; i++) {
+            factorial[i] = factorial[i - 1] * i;
+            numbers.push_back(i);
+        }
+        numbers.push_back(n);
+
+        // Adjust k to be 0-indexed for easier math
+        k--; 
+
+        string result = "";
+        for (int i = n - 1; i >= 0; i--) {
+            // Calculate index of the next digit
+            int idx = k / factorial[i];
+            k %= factorial[i];
+
+            // Append digit to result and remove from available pool
+            result += to_string(numbers[idx]);
+            numbers.erase(numbers.begin() + idx);
+        }
+
+        return result;
+    }
+};
