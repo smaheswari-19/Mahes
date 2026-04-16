@@ -1,0 +1,59 @@
+#include <vector>
+
+class Solution {
+public:
+    int checkRecord(int n) {
+        long MOD = 1e9 + 7;
+        
+        // dp[absences][consecutive_lates]
+        // State: dp[2][3]
+        // dp[0][0]: 0 'A', 0 ending 'L'
+        // dp[0][1]: 0 'A', 1 ending 'L'
+        // dp[0][2]: 0 'A', 2 ending 'L'
+        // dp[1][0]: 1 'A', 0 ending 'L'
+        // dp[1][1]: 1 'A', 1 ending 'L'
+        // dp[1][2]: 1 'A', 2 ending 'L'
+        vector<vector<long>> dp(2, vector<long>(3, 0));
+
+        // Base case: Day 0 (empty string)
+        dp[0][0] = 1;
+
+        for (int i = 1; i <= n; ++i) {
+            vector<vector<long>> next_dp(2, vector<long>(3, 0));
+
+            // Iterate through previous states
+            for (int a = 0; a < 2; ++a) {
+                for (int l = 0; l < 3; ++l) {
+                    if (dp[a][l] == 0) continue;
+
+                    // 1. Append 'P' (Present)
+                    // Resets late count to 0, absence count stays same
+                    next_dp[a][0] = (next_dp[a][0] + dp[a][l]) % MOD;
+
+                    // 2. Append 'L' (Late)
+                    // Increases late count by 1, absence count stays same
+                    if (l < 2) {
+                        next_dp[a][l + 1] = (next_dp[a][l + 1] + dp[a][l]) % MOD;
+                    }
+
+                    // 3. Append 'A' (Absent)
+                    // Resets late count to 0, increases absence count by 1
+                    if (a < 1) {
+                        next_dp[a + 1][0] = (next_dp[a + 1][0] + dp[a][l]) % MOD;
+                    }
+                }
+            }
+            dp = next_dp;
+        }
+
+        // The answer is the sum of all valid states for day n
+        long result = 0;
+        for (int a = 0; a < 2; ++a) {
+            for (int l = 0; l < 3; ++l) {
+                result = (result + dp[a][l]) % MOD;
+            }
+        }
+
+        return (int)result;
+    }
+};
