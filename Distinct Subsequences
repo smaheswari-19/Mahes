@@ -1,0 +1,40 @@
+#include <vector>
+#include <string>
+
+using namespace std;
+
+class Solution {
+public:
+    int numDistinct(string s, string t) {
+        int n = s.length();
+        int m = t.length();
+
+        // If s is shorter than t, it's impossible to form t
+        if (n < m) return 0;
+
+        // dp[j] stores the number of distinct subsequences of s 
+        // that equal the prefix of t of length j.
+        // Using unsigned long long to handle potential intermediate overflow, 
+        // though the problem guarantees the final answer fits in a 32-bit int.
+        vector<unsigned int> dp(m + 1, 0);
+
+        // Base case: An empty t is a subsequence of any prefix of s (exactly 1 way)
+        dp[0] = 1;
+
+        for (int i = 1; i <= n; ++i) {
+            // Traverse backwards to use values from the "previous row" 
+            // without overwriting them prematurely.
+            for (int j = m; j >= 1; --j) {
+                // If the characters match, we have two choices:
+                // 1. Use s[i-1] to match t[j-1] -> dp[j-1] ways
+                // 2. Don't use s[i-1] -> keep existing dp[j] ways
+                if (s[i - 1] == t[j - 1]) {
+                    dp[j] += dp[j - 1];
+                }
+                // If they don't match, we just keep dp[j] (the "don't use" case)
+            }
+        }
+
+        return dp[m];
+    }
+};
