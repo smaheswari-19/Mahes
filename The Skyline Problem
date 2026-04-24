@@ -1,0 +1,47 @@
+#include <vector>
+#include <algorithm>
+#include <set>
+
+using namespace std;
+
+class Solution {
+public:
+    vector<vector<int>> getSkyline(vector<vector<int>>& buildings) {
+        // 1. Create events: [x, height]
+        // Use negative height for start of building, positive for end
+        // to handle overlapping edges correctly during sorting.
+        vector<pair<int, int>> events;
+        for (const auto& b : buildings) {
+            events.push_back({b[0], -b[2]}); // Start
+            events.push_back({b[1], b[2]});  // End
+        }
+
+        // 2. Sort events by x-coordinate
+        sort(events.begin(), events.end());
+
+        vector<vector<int>> result;
+        multiset<int> heights = {0}; // Tracks active building heights
+        int prevMaxHeight = 0;
+
+        for (const auto& event : events) {
+            int x = event.first;
+            int h = event.second;
+
+            if (h < 0) {
+                heights.insert(-h); // Entering a building
+            } else {
+                heights.erase(heights.find(h)); // Leaving a building
+            }
+
+            int currentMaxHeight = *heights.rbegin();
+            
+            // 3. If the max height changes, we found a key point
+            if (currentMaxHeight != prevMaxHeight) {
+                result.push_back({x, currentMaxHeight});
+                prevMaxHeight = currentMaxHeight;
+            }
+        }
+
+        return result;
+    }
+};
